@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6" style="padding-top:5%;">
+            <div class="panel-header">
+                {%if message%}
+                        <div class="alert alert-primary">
+                            <h4 class="text-danger">{{message}}</h4>
+                        </div>
+                {% endif %}
+            </div>
+            <div class="panel panel-success">
+                <div class="panel panel-body">
+                    <h3 class="text-primary" >login</h3>
+                    <div method="post" class="form-horizontal">
+                        {%csrf_token%}
+                        <div class="form-group"></div>
+                            Email:<input type="email" class="form-control" name="email" placeholder="email">
+                        </div>
+                        <div class="form-group">
+                            Password:<input type="password" class="form-control" name="password" placeholder="password">
+                        </div>
+                        <div class="form form-group">
+                            <button class="btn btn-success" type="submit">Submit</button>
+                        </div>
+                    </form>
+                    <div >
+                        <p class="text-center">Not registered?<a href="{% url 'boom:signup' %} ">Register</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

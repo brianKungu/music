@@ -1,0 +1,58 @@
+{% extends 'music/base.html' %}
+{% block title %}{{album.album_name}}{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!--Album info-->
+        <div class="col-sm-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <img src="{{album.album_cover.url}}" class="img img-responsive" alt="">
+                <div class="caption">
+                    <h5>{{album.album_name}}</h5>
+                     <h5>{{album.album_genre}}</h5>
+
+                </div>
+            </div>
+        </div>
+        </div>
+
+     <!--song info-->
+        <div class="col-sm-9">
+        <ul class="nav nav-pills">
+            <li class="active"><a href="">Songs</a></li>
+            <li><a href="{% url 'boom:create-song' album.id%}">Add Song</a></li>
+        </ul>
+<div class="panel panel-success" style="margin:2px;">
+    <div class="panel-body">
+
+    <h3 class="text-info">Songs</h3>
+        <hr>
+        <table class="table table-stripe">
+            <thead>
+            <th>Song Name</th>
+            <th>Audio</th>
+            <th>favorite</th>
+            <th>Action</th>
+
+            </thead>
+            <tbody>
+            {% if album.song_set%}
+                {% for song in album.song_set.all%}
+                <tr>
+                    <td>{{song.song_name}}</td>
+                    <td><a href="{{song.song_audio}}" class="btn btn-info btn-sm" target="_blank"><i class="fas fa-play"></i></a></td>
+                    <td><a href="" class="btn btn-warning btn-sm"><i class="fas fa-star"></i></a> </td>
+                    <td><a href="{% url 'boom:song_update' song.id %}" class="btn btn-success"><i class="fas fa-edit"></i> </a>
+                        <a href="{% url 'boom:song-delete' album.id song.id %}" class="btn btn-danger"><i class="fas fa-trash"></i> </a></td>
+                </tr>
+                {%endfor%}
+            {%endif%}
+            </tbody>
+        </table>
+    </div>
+</div>
+            </div>
+    </div>
+</div>
+{% endblock %}
