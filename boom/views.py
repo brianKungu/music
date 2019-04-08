@@ -4,12 +4,25 @@ from . forms import AlbumForm,SongForm,UserForm
 from django.views.generic import UpdateView,DeleteView
 from django.contrib.auth import login,authenticate,logout
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 # Create your views here.
 @login_required(login_url='boom:login')
 def index(request):
+    albums = Album.objects.filter(user=request.user)
+    song_results=Song.objects.all()
+    query=request.GET.get("q")
+    if query:
+        albums= albums.filter(
+            Q(album_name__icontains=query)|
+            Q(artist_name__icontains=query)
+        ).distinct()
+        song_results=song_results.filter(
+            Q(song_name__icontains=query)
+        ).distinct()
+        return render(request,'music/index.html',{'albums':albums})
+    return render(request,'music/index.html',{'albums':albums,'songs':song_results})
 
-    albums = Album.objects.all()
-    return render(request,'music/index.html',{'albums':albums})
+
 
 def detail(request,album_id):
     album=get_object_or_404(Album,pk=album_id)
@@ -18,7 +31,7 @@ def detail(request,album_id):
 def create_album(request):
     form = AlbumForm(request.POST or None, request.FILES or None)
     if form.is_valid():
-        albums = Album.objects.all()
+        albums = Album.objects.filter(user=request.user)
         for album in albums:
             if album.album_name==form.cleaned_data.get('album_name'):
                 context={
@@ -26,9 +39,10 @@ def create_album(request):
                     'message':'you have already added the album'
 
                 }
-                return render(request, 'boom/create_album',context)
+                return render(request, 'music/create_album.html',context)
         album=form.save(commit=False)
         album.album_cover=request.FILES['album_cover']
+        album.user=request.user
         album.save()
         return render(request,'music/info.html',{'album':album})
     return render(request,'music/create_album.html', {'form':form})
@@ -36,7 +50,7 @@ def create_album(request):
 class AlbumUpdateView(UpdateView):
     model=Album
     fields=['album_name','artist_name','artist_genre']
-    template='boom/create-album.html'
+    template='music/create-album.html'
 
 def album_delete(delete,album_id):
     album=get_object_or_404(Album, pk=album_id)
@@ -53,7 +67,7 @@ def create_song(request, album_id):
                     'form':form,
                     'message':'You have already added that song'
                 }
-                return render(request,'boom/create_song.html',context
+                return render(request,'music/create_song.html',context
                               )
         song=form.save(commit=False)
         song.album=album
@@ -72,8 +86,8 @@ def delete_song(request,album_id,song_id):
     song=get_object_or_404(Song, pk=song_id)
     song.delete()
     context={
-        'album':album,
-        'message':'Song Deleted Successfully!'
+        'album' : album,
+        'message' : 'Song Deleted Successfully!'
     }
     return render(request, 'boom/info.html',context)
 
@@ -94,9 +108,9 @@ def signup(request):
 
 def signin(request):
     if request.method=='POST':
-        email=request.POST['email']
+        username=request.POST['username']
         password=request.POST['password']
-        user=authenticate(email=email,password=password)
+        user=authenticate(username=username,password=password)
         if user.is_active:
             login(request,user)
             return redirect('boom:index')
@@ -104,7 +118,4 @@ def signin(request):
 
 def logout_user(request):
     logout(request)
-    context={
-        'message':'logged out'
-    }
-    return render(request,'boom:login',context)
+    return redirect('boom:login')
